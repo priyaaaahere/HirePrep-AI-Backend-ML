@@ -4,7 +4,6 @@ import tempfile
 from app.pdf_to_text import extract_text_from_pdf
 from app.resume_parser import build_editable_profile
 
-
 app = FastAPI(title="HirePrep AI Backend")
 
 
@@ -16,20 +15,13 @@ def root():
 @app.post("/parse-resume")
 async def parse_resume(file: UploadFile = File(...)):
     """
-    1. Receives resume PDF from frontend
-    2. Parses it
-    3. Returns EDITABLE JSON
+    Upload resume PDF → return EDITABLE draft JSON
     """
-
-    # Save uploaded PDF temporarily
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
         temp_file.write(await file.read())
         pdf_path = temp_file.name
 
-    # PDF → text
     raw_text = extract_text_from_pdf(pdf_path)
-
-    # text → editable JSON
     profile_json = build_editable_profile(raw_text)
 
     return profile_json
@@ -38,11 +30,19 @@ async def parse_resume(file: UploadFile = File(...)):
 @app.post("/analyze-profile")
 async def analyze_profile(profile: dict):
     """
-    Receives user-edited JSON
-    (Later: ML, EDA, ATS, Gemini)
+    Accept ONLY user-confirmed profile for ML / EDA
     """
+
+    meta = profile.get("meta", {})
+
+    if meta.get("user_verified") is not True:
+        return {
+            "error": "Profile not confirmed by user. Analysis aborted."
+        }
+
+    # Future: ML, skill gap, ATS, Gemini
     return {
-        "message": "Profile received successfully",
+        "message": "Confirmed profile received. Ready for analysis.",
         "profile_used": profile
     }
 
@@ -50,7 +50,7 @@ async def analyze_profile(profile: dict):
 @app.get("/test-resume")
 def test_resume():
     """
-    Test endpoint to parse the sample resume.pdf from the data folder.
+    Local test using data/resume.pdf
     """
     pdf_path = "data/resume.pdf"
     raw_text = extract_text_from_pdf(pdf_path)
