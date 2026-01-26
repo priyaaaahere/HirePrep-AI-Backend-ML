@@ -14,7 +14,6 @@ def clean_text(text: str) -> str:
     text = re.sub(r"[•●▪◦►]", "\n", text)
     return text.strip()
 
-
 # ----------------------------
 # Section extraction
 # ----------------------------
@@ -80,6 +79,27 @@ def extract_skills_from_section(skills_text: str) -> List[str]:
 
     return sorted(skills)
 
+# ----------------------------
+# Certifications extraction
+# ----------------------------
+def extract_certifications_from_section(cert_text: str) -> List[str]:
+    if not cert_text:
+        return []
+
+    # Remove labels like "Certifications:"
+    cert_text = re.sub(r"[A-Za-z\s]+:", "", cert_text)
+
+    # Split on new lines, bullets, commas
+    raw_certs = re.split(r"\n|•|,|\|", cert_text)
+
+    certifications = {
+        cert.strip()
+        for cert in raw_certs
+        if cert.strip() and len(cert.strip()) > 3
+    }
+
+    return sorted(certifications)
+
 
 # ----------------------------
 # Education & experience
@@ -117,6 +137,7 @@ def estimate_experience_years(text: str) -> int:
     return int(match.group(1)) if match else 0
 
 
+
 # ----------------------------
 # FINAL editable profile
 # ----------------------------
@@ -125,6 +146,9 @@ def build_editable_profile(resume_text: str) -> Dict:
 
     skills_section = extract_section(clean, "Skills")
     skills = extract_skills_from_section(skills_section)
+
+    cert_section = extract_section(clean, "Certifications")
+    certifications = extract_certifications_from_section(cert_section)
 
     experience_years = estimate_experience_years(clean)
 
@@ -148,8 +172,15 @@ def build_editable_profile(resume_text: str) -> Dict:
 
         "projects": [],
         "internships": [],
-        "certifications": [],
-        "achievements": [],
+        "certifications": certifications,
+
+        "placement_inputs": {
+            "communication_rating": "",   #user enters from 1-5
+            "hackathon": "No",            #Yes/No
+            "tenth_percent": "",          
+            "twelfth_percent": "",        
+            "backlogs": 0           
+        },
 
         "experience": {
             "years": experience_years,
@@ -160,7 +191,11 @@ def build_editable_profile(resume_text: str) -> Dict:
                 "senior"
             )
         },
-
+        "career_preferences": {
+            "desired_role": "",
+            "experience_level": ""
+        },
+        
         "meta": {
             "status": "draft",
             "editable": True,
