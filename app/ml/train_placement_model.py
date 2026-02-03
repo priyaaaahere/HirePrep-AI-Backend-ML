@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 
 DATA_PATH = "data/Placement_Prediction_data.csv"
-MODEL_PATH = "app/ml/placement_model.pkl"
+MODEL_PATH = "app/ml/models/placement_model.pkl"
 TARGET_COL = "PlacementStatus"
 
 def main():

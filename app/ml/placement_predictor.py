@@ -1,7 +1,7 @@
 import joblib
 import pandas as pd
 
-MODEL_PATH = "app/ml/placement_model.pkl"
+MODEL_PATH = "app/ml/models/placement_model.pkl"
 _model = None
 
 

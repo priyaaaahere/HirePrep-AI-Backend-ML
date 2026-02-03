@@ -1,0 +1,78 @@
+{
+    "meta": {
+        "user_verified": true
+    },
+    "name": "Rahul Sharma",
+    "email": "rahul.sharma@email.com",
+    "phone": "+91 9876543210",
+    "linkedin": "linkedin.com/in/rahulsharma",
+    "github": "github.com/rahulsharma",
+
+    "education": {
+        "degree": "Bachelor",
+        "branch": "Computer Science",
+        "cgpa": "8.2",
+        "graduation_year": "2024"
+    },
+
+    "skills": [
+        "Python",
+        "Java",
+        "JavaScript",
+        "React",
+        "Node.js",
+        "SQL",
+        "MongoDB",
+        "Git",
+        "Docker",
+        "AWS",
+        "HTML",
+        "CSS",
+        "REST APIs"
+    ],
+
+    "projects": [
+        {
+            "name": "E-commerce Platform",
+            "description": "Built full-stack e-commerce website using MERN stack"
+        },
+        {
+            "name": "ML Chatbot",
+            "description": "Developed NLP-based chatbot using Python and TensorFlow"
+        },
+        {
+            "name": "Portfolio Website",
+            "description": "Personal portfolio using React and Node.js"
+        }
+    ],
+
+    "certifications": [
+        "AWS Cloud Practitioner",
+        "Google Data Analytics"
+    ],
+
+    "internships": [
+        {
+            "company": "TechCorp",
+            "role": "Software Developer Intern",
+            "duration": "3 months"
+        }
+    ],
+
+    "experience": {
+        "years": 0
+    },
+
+    "career_preferences": {
+        "desired_role": "Backend Developer",
+        "experience_level": "Fresher"
+    },
+
+    "placement_inputs": {
+        "communication_rating": 4.2,
+        "hackathon": "Yes",
+        "twelfth_percent": 85,
+        "tenth_percent": 90,
+        "backlogs": 0
+    }
+}
