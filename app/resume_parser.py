@@ -210,7 +210,7 @@ def extract_projects_from_section(project_text: str) -> List[str]:
             continue
 
         # Titles are usually short-ish
-        if len(line) > 150:
+        if len(line) > 90:
             continue
 
         # Look ahead: is there descriptive content below?
@@ -219,7 +219,7 @@ def extract_projects_from_section(project_text: str) -> List[str]:
             next_line = lines[j]
 
             # Stop if next project starts
-            if next_line[0].isupper() and len(next_line) < 150:
+            if next_line[0].isupper() and len(next_line) < 90:
                 break
 
             # Heuristic: description lines are longer and detailed

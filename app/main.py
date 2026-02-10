@@ -47,36 +47,6 @@ async def parse_resume_analysis(file: UploadFile = File(...)):
     return analysis_data
 
 
-@app.post("/analyze-profile")
-async def analyze_profile(profile: dict):
-    """
-    Accept ONLY user-confirmed profile for ML / EDA
-    """
-
-    meta = profile.get("meta", {})
-
-    if meta.get("user_verified") is not True:
-        return {
-            "error": "Profile not confirmed by user. Analysis aborted."
-        }
-
-    # Future: ML, skill gap, ATS, Gemini
-    return {
-        "message": "Confirmed profile received. Ready for analysis.",
-        "profile_used": profile
-    }
-
-
-@app.get("/test-resume")
-def test_resume():
-    """
-    Local test using data/resume.pdf
-    """
-    pdf_path = "data/resume.pdf"
-    raw_text = extract_text_from_pdf(pdf_path)
-    profile_json = build_editable_profile(raw_text)
-    return profile_json
-
 @app.post("/placement-probability")
 async def placement_probability(profile: dict):
     meta = profile.get("meta", {})
@@ -249,11 +219,8 @@ async def complete_analysis(profile: dict):
 
         # ---- USER PROFILE SUMMARY ----
         "profile_summary": {
-            "name": profile.get("name", ""),
-            "email": profile.get("email", ""),
             "skills_count": len(skills),
             "experience_years": profile.get("experience", {}).get("years", 0),
-            "education": profile.get("education", {}).get("degree", ""),
             "projects_count": len(profile.get("projects", [])),
             "certifications_count": len(profile.get("certifications", [])),
             "internships_count": len(profile.get("internships", []))
