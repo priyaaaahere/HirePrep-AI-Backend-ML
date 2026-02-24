@@ -1,1 +1,101 @@
+# ========================
+# Environment & Secrets
+# ========================
 .env
+.env.*
+*.env
+
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ========================
+# Virtual Environments
+# ========================
+venv/
+.venv/
+env/
+ENV/
+
+# ========================
+# ML / Data Science Models
+# ========================
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.model
+*.pt
+*.pth
+*.onnx
+*.pb
+*.tflite
+
+# ========================
+# Jupyter Notebooks
+# ========================
+.ipynb_checkpoints/
+*.ipynb
+
+# ========================
+# IDE / Editor
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# ========================
+# OS Generated Files
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ========================
+# Uploaded / Temp files
+# ========================
+*.pdf
+*.tmp
+*.bak
+*.log
+
+# ========================
+# Data files (large CSVs)
+# ========================
+data/*.csv
+skillgap_data/CSV/
+skillgap_data/JSON/
+skill_gap_codes/data/CSV/
+skill_gap_codes/data/JSON/
+skill_gap_codes/data/jobs.csv
+
+# ========================
+# Postman test files
+# ========================
+postman_test_input.json
+postman_test_scenarios.json
+
+# ========================
+# Misc
+# ========================
+skill_gap_codes/random/
+skill_gap_codes/venv/
