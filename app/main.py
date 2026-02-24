@@ -17,6 +17,11 @@ def root():
     return {"status": "HirePrep AI backend running"}
 
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+
 @app.post("/parse-resume")
 async def parse_resume(file: UploadFile = File(...)):
     """
