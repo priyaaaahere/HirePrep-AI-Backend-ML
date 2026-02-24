@@ -1,8 +1,9 @@
 import pandas as pd
 from typing import Dict, List, Set, Optional
-from collections import defaultdict
 
-DATASET_PATH = "data/job_dataset.csv"
+from app.experience import map_experience_level
+
+DATASET_PATH = "data/job_dataset_aggregated.csv"
 
 # Flag to track if semantic matching is available
 _semantic_matching_available = None
@@ -69,20 +70,6 @@ def calculate_skill_similarity(resume_skills: Set[str], job_skills: Set[str]) ->
     coverage = len(matched) / len(job_skills) if job_skills else 0
     
     return coverage * 100
-
-
-def map_experience_level(years: int) -> str:
-    """
-    Map years of experience to experience level category
-    """
-    if years <= 1:
-        return "fresher"
-    elif years <= 3:
-        return "junior"
-    elif years <= 5:
-        return "mid"
-    else:
-        return "senior"
 
 
 def experience_level_match(user_level: str, job_level: str) -> float:
@@ -157,9 +144,8 @@ def recommend_roles(
         # Get the first row for this title (representative)
         row = group.iloc[0]
         
-        job_skills = parse_skills(row.get("Skills", ""))
-        job_level = str(row.get("ExperienceLevel", ""))
-        job_keywords = str(row.get("Keywords", ""))
+        job_skills = parse_skills(row.get("All_Skills", ""))
+        job_level = str(row.get("ExperienceLevel_Category", ""))
         
         # Calculate skill similarity
         skill_score = calculate_skill_similarity(resume_skill_set, job_skills)
@@ -167,16 +153,9 @@ def recommend_roles(
         # Calculate experience level match
         exp_score = experience_level_match(user_exp_level, job_level)
         
-        # Bonus for keyword matches
-        keyword_bonus = 0
-        if job_keywords:
-            keywords_set = {normalize_skill(k) for k in job_keywords.split(";")}
-            keyword_matches = resume_skill_set.intersection(keywords_set)
-            keyword_bonus = min(len(keyword_matches) * 5, 20)  # Max 20 bonus points
-        
         # Final score: weighted combination
-        # Skill match: 60%, Experience match: 30%, Keyword bonus: 10%
-        final_score = (0.6 * skill_score) + (0.3 * exp_score) + (0.1 * keyword_bonus)
+        # Skill match: 70%, Experience match: 30%
+        final_score = (0.7 * skill_score) + (0.3 * exp_score)
         
         # Find matched and missing skills
         matched_skills = sorted(resume_skill_set.intersection(job_skills))
@@ -284,7 +263,7 @@ def get_role_recommendations_from_profile(profile: dict, top_n: int = 10) -> Dic
             "stretch_roles_count": len(stretch_roles),
             "top_role": recommendations[0]["role"] if recommendations else None,
             "top_score": recommendations[0]["match_score"] if recommendations else 0
-        },
+        },  
         "user_profile_summary": {
             "skills_count": len(skills),
             "experience_level": map_experience_level(experience_years),

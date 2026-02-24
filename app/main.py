@@ -3,9 +3,11 @@ import tempfile
 
 from app.pdf_to_text import extract_text_from_pdf
 from app.resume_parser import parse_resume_for_frontend, parse_resume_for_analysis
+from app.experience import map_experience_level
 from app.ml.placement_predictor import predict_base_probability
 from app.ml.skill_matcher import compute_skill_match
 from app.ml.role_recommender import get_role_recommendations_from_profile
+from app.Services.gemini_role_recommender import get_gemini_role_recommendations
 
 app = FastAPI(title="HirePrep AI Backend")
 
@@ -64,7 +66,10 @@ async def placement_probability(profile: dict):
     # -------------------------
     career = profile.get("career_preferences", {})
     desired_role = career.get("desired_role", "")
-    experience_level = career.get("experience_level", "")
+    
+    # Calculate experience_level from experience years (not from user input)
+    experience_years = profile.get("experience", {}).get("years", 0)
+    experience_level = map_experience_level(experience_years)
 
     skills = profile.get("skills", [])
 
@@ -104,7 +109,7 @@ async def placement_probability(profile: dict):
 
 
 @app.post("/recommend-roles")
-async def recommend_roles(profile: dict, top_n: int = 10):
+async def recommend_roles(profile: dict, top_n: int = 5):
     """
     Recommend suitable job roles based on user's resume/profile.
     Analyzes skills, experience, and education to find best matches.
@@ -114,11 +119,27 @@ async def recommend_roles(profile: dict, top_n: int = 10):
     if meta.get("user_verified") is not True:
         return {"error": "Profile not confirmed by user"}
 
-    # Get role recommendations
-    result = get_role_recommendations_from_profile(profile, top_n=top_n)
+    gemini_result = get_gemini_role_recommendations(profile, top_n=top_n)
+    if gemini_result:
+        return {
+            "skill_analysis": gemini_result.get("skill_analysis"),
+            "role_recommendations": {
+                "top_roles": [
+                    {
+                        "rank": role.get("rank"),
+                        "role": role.get("role", ""),
+                        "experience_level": role.get("experience_level", ""),
+                        "skill_match_percent": role.get("skill_match_percent", 0),
+                        "matched_skills": role.get("matched_skills", []),
+                        "skills_to_learn": role.get("skills_to_learn", []),
+                    }
+                    for role in gemini_result.get("top_roles", [])
+                ],
+            },
+            "source": gemini_result.get("source", "gemini_hybrid"),
+        }
 
-    return result
-
+    return get_role_recommendations_from_profile(profile, top_n=top_n)
 
 @app.post("/complete-analysis")
 async def complete_analysis(profile: dict):
@@ -143,7 +164,11 @@ async def complete_analysis(profile: dict):
     # =========================================================
     career = profile.get("career_preferences", {})
     desired_role = career.get("desired_role", "")
-    experience_level = career.get("experience_level", "")
+    
+    # Calculate experience_level from experience years (not from user input)
+    experience_years = profile.get("experience", {}).get("years", 0)
+    experience_level = map_experience_level(experience_years)
+    
     skills = profile.get("skills", [])
 
     skill_analysis = compute_skill_match(
@@ -169,15 +194,32 @@ async def complete_analysis(profile: dict):
     # =========================================================
     # 4. ROLE RECOMMENDATIONS (Top 5)
     # =========================================================
+    # gemini_roles = get_gemini_role_recommendations(profile, top_n=5)
+    # if gemini_roles:
+    #     top_roles = gemini_roles.get("top_roles", [])
+    #     role_source = gemini_roles.get("source", "gemini")
+    # else:
+    #     
     role_result = get_role_recommendations_from_profile(profile, top_n=5)
-    top_roles = role_result.get("recommendations", [])
+    top_roles = [
+            {
+                "rank": idx + 1,
+                "role": role["role"],
+                "experience_level": role["experience_level"],
+                "match_percentage": role["match_score"],
+                "skill_match_percent": role["skill_match_percent"],
+                "matched_skills": role["matched_skills"],
+                "skills_to_learn": role["skills_to_learn"]
+            }
+            for idx, role in enumerate(role_result.get("recommendations", []))
+        ]
+    role_source = "dataset"
 
     # =========================================================
     # 5. BUILD COMPLETE RESPONSE
     # =========================================================
     return {
         "status": "success",
-        "message": "Complete profile analysis generated",
 
         # ---- PLACEMENT PROBABILITY BREAKDOWN ----
         "placement_analysis": {
@@ -202,29 +244,10 @@ async def complete_analysis(profile: dict):
 
         # ---- TOP 5 ROLE RECOMMENDATIONS ----
         "role_recommendations": {
-            "top_roles": [
-                {
-                    "rank": idx + 1,
-                    "role": role["role"],
-                    "experience_level": role["experience_level"],
-                    "match_percentage": role["match_score"],
-                    "skill_match_percent": role["skill_match_percent"],
-                    "matched_skills": role["matched_skills"],
-                    "skills_to_learn": role["skills_to_learn"]
-                }
-                for idx, role in enumerate(top_roles)
-            ],
-            "total_roles_analyzed": role_result.get("total_roles_analyzed", 0)
+            "top_roles": top_roles,
+            "source": role_source
         },
 
-        # ---- USER PROFILE SUMMARY ----
-        "profile_summary": {
-            "skills_count": len(skills),
-            "experience_years": profile.get("experience", {}).get("years", 0),
-            "projects_count": len(profile.get("projects", [])),
-            "certifications_count": len(profile.get("certifications", [])),
-            "internships_count": len(profile.get("internships", []))
-        }
     }
 
 

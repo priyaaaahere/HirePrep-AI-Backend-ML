@@ -1,0 +1,152 @@
+{
+    "test_scenarios": [
+        {
+            "scenario_name": "Fresher/Entry-Level (0 years)",
+            "description": "Experience years: 0 → Auto-calculated as Entry-Level",
+            "input": {
+                "meta": { "user_verified": true },
+                "education": { "cgpa": "8.2" },
+                "skills": ["Python", "Java", "JavaScript", "React", "Node.js", "SQL", "MongoDB", "Git", "Docker", "AWS"],
+                "projects": [{}, {}, {}],
+                "certifications": ["AWS Cloud Practitioner", "Google Data Analytics"],
+                "internships": [{}],
+                "experience": { "years": 0 },
+                "career_preferences": {
+                    "desired_role": "Backend Developer"
+                },
+                "placement_inputs": {
+                    "communication_rating": 4.2,
+                    "hackathon": "Yes",
+                    "twelfth_percent": 85,
+                    "tenth_percent": 90,
+                    "backlogs": 0
+                }
+            }
+        },
+        {
+            "scenario_name": "Entry-Level (2 years)",
+            "description": "Experience years: 2 → Auto-calculated as Entry-Level",
+            "input": {
+                "meta": { "user_verified": true },
+                "education": { "cgpa": "8.5" },
+                "skills": ["Python", "Java", "JavaScript", "React", "Node.js", "SQL", "MongoDB", "Git", "Docker", "AWS", "Kubernetes"],
+                "projects": [{}, {}, {}, {}],
+                "certifications": ["AWS Solutions Architect", "Docker Certified"],
+                "internships": [{}, {}],
+                "experience": { "years": 2 },
+                "career_preferences": {
+                    "desired_role": "Full Stack Developer"
+                },
+                "placement_inputs": {
+                    "communication_rating": 4.5,
+                    "hackathon": "Yes",
+                    "twelfth_percent": 88,
+                    "tenth_percent": 92,
+                    "backlogs": 0
+                }
+            }
+        },
+        {
+            "scenario_name": "Mid-Level (3 years)",
+            "description": "Experience years: 3 → Auto-calculated as Mid-Level",
+            "input": {
+                "meta": { "user_verified": true },
+                "education": { "cgpa": "8.7" },
+                "skills": ["Python", "Java", "JavaScript", "React", "Node.js", "SQL", "MongoDB", "Git", "Docker", "AWS", "Kubernetes", "Microservices", "CI/CD"],
+                "projects": [{}, {}, {}, {}, {}],
+                "certifications": ["AWS Solutions Architect", "Kubernetes Administrator", "Azure DevOps"],
+                "internships": [{}, {}],
+                "experience": { "years": 3 },
+                "career_preferences": {
+                    "desired_role": "DevOps Engineer"
+                },
+                "placement_inputs": {
+                    "communication_rating": 4.7,
+                    "hackathon": "Yes",
+                    "twelfth_percent": 90,
+                    "tenth_percent": 93,
+                    "backlogs": 0
+                }
+            }
+        },
+        {
+            "scenario_name": "Mid-Level (4 years)",
+            "description": "Experience years: 4 → Auto-calculated as Mid-Level",
+            "input": {
+                "meta": { "user_verified": true },
+                "education": { "cgpa": "8.9" },
+                "skills": ["Python", "TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy", "SQL", "MongoDB", "AWS", "Docker", "MLOps"],
+                "projects": [{}, {}, {}, {}, {}, {}],
+                "certifications": ["TensorFlow Developer", "AWS Machine Learning", "Google Cloud Professional ML Engineer"],
+                "internships": [{}, {}],
+                "experience": { "years": 4 },
+                "career_preferences": {
+                    "desired_role": "Machine Learning Engineer"
+                },
+                "placement_inputs": {
+                    "communication_rating": 4.8,
+                    "hackathon": "Yes",
+                    "twelfth_percent": 92,
+                    "tenth_percent": 95,
+                    "backlogs": 0
+                }
+            }
+        },
+        {
+            "scenario_name": "Senior-Level (5 years)",
+            "description": "Experience years: 5 → Auto-calculated as Senior-Level",
+            "input": {
+                "meta": { "user_verified": true },
+                "education": { "cgpa": "9.0" },
+                "skills": ["Python", "Java", "Go", "Kubernetes", "Docker", "AWS", "Azure", "Terraform", "CI/CD", "Microservices", "System Design"],
+                "projects": [{}, {}, {}, {}, {}, {}, {}],
+                "certifications": ["AWS Solutions Architect Professional", "Kubernetes CKA", "Azure Solutions Architect Expert"],
+                "internships": [{}, {}],
+                "experience": { "years": 5 },
+                "career_preferences": {
+                    "desired_role": "Cloud Architect"
+                },
+                "placement_inputs": {
+                    "communication_rating": 4.9,
+                    "hackathon": "Yes",
+                    "twelfth_percent": 94,
+                    "tenth_percent": 96,
+                    "backlogs": 0
+                }
+            }
+        },
+        {
+            "scenario_name": "Senior-Level (7 years)",
+            "description": "Experience years: 7 → Auto-calculated as Senior-Level",
+            "input": {
+                "meta": { "user_verified": true },
+                "education": { "cgpa": "9.2" },
+                "skills": ["Python", "Java", "Scala", "TensorFlow", "PyTorch", "AWS", "GCP", "Kubernetes", "MLOps", "System Design", "Team Leadership"],
+                "projects": [{}, {}, {}, {}, {}, {}, {}, {}],
+                "certifications": ["AWS ML Specialty", "Google Cloud Professional ML Engineer", "TensorFlow Developer", "Azure AI Engineer"],
+                "internships": [{}, {}],
+                "experience": { "years": 7 },
+                "career_preferences": {
+                    "desired_role": "AI/ML Engineer"
+                },
+                "placement_inputs": {
+                    "communication_rating": 5.0,
+                    "hackathon": "Yes",
+                    "twelfth_percent": 95,
+                    "tenth_percent": 97,
+                    "backlogs": 0
+                }
+            }
+        }
+    ],
+    "experience_level_mapping": {
+        "Entry-Level": "0-2 years",
+        "Mid-Level": "3-4 years",
+        "Senior-Level": "5+ years"
+    },
+    "notes": [
+        "The 'experience_level' field is NO LONGER needed in 'career_preferences'",
+        "It is now automatically calculated from 'experience.years' using the mapping above",
+        "This ensures consistency across the application and eliminates user input errors"
+    ]
+}

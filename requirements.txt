@@ -7,3 +7,5 @@ scikit-learn
 joblib
 spacy
 sentence-transformers
+google-genai
+python-dotenv
