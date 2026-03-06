@@ -34,14 +34,6 @@ def _extract_json(text: str) -> Optional[Dict]:
     except json.JSONDecodeError:
         return None
 
-
-def _coerce_float(value: object, default: float = 0.0) -> float:
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return default
-
-
 def _process_role(role_data: dict, resume_skills: List[str]) -> Dict:
     role_name = role_data.get("role")
     experience_level = role_data.get("experience_level")
@@ -102,75 +94,84 @@ def _build_prompt(profile: dict, top_n: int) -> str:
 
     skills_list = ", ".join(skills) if skills else "None provided"
 
-    return f"""You are an expert career advisor and skill analyzer. Your task is to analyze a candidate's profile and return structured JSON data.
+    # Load real role data filtered to candidate's experience level
+    df = load_job_data()
+    level_df = df[df["ExperienceLevel_Category"] == experience_level]
+    role_skill_map = ""
+    for _, row in level_df.iterrows():
+        role_skill_map += f"- {row['Title']}: {row['All_Skills']}\n"
+
+        return f"""You are an expert career advisor and skill analyzer. Your task is to analyze a candidate's profile and return structured JSON data.
 
     You will be given:
     - The candidate's current skills (from their resume)
     - Their years of experience and experience level
     - Their desired job role
+    - A reference list of real job roles with their required skills
     - How many alternative roles to recommend
 
     Your output has TWO parts:
 
-    PART 1 : Desired Role Analysis:
-    Analyze the candidate's desired role at their experience level.
-    Determine which of the candidate's skills are relevant (matched) and which important skills they still need to learn (missing).
-
-    PART 2 : Role Recommendations:
-    Recommend exactly {top_n} alternative job roles that best suit the candidate's existing skills.
-    For each role, determine which candidate skills are relevant and which new skills they need.
-    Choose roles where the candidate's skills have meaningful overlap.
-    Vary the roles ; do not suggest similar roles repeatedly.
-
     ========================================
-    SKILL MATCHING INTELLIGENCE (VERY IMPORTANT):
+    SKILL MATCHING RULES (VERY IMPORTANT):
     ========================================
 
-    When deciding whether a candidate "knows" a skill, you MUST apply deep domain understanding.
-    Do NOT do simple string matching. Use these principles:
+    When deciding whether a candidate "knows" a skill, apply deep domain understanding. Do NOT do simple string matching. Use these principles:
 
-    1. TOOL / IMPLEMENTATION implies the UNDERLYING CONCEPT:
-       - A candidate who knows "mysql", "postgresql", or "sqlite" obviously knows "sql".
-       - A candidate who knows "git" or "github" obviously knows "version control".
-       - A candidate who knows "react" obviously knows "javascript" and "frontend development".
-       - A candidate who knows "docker" understands "containerization".
+    1. A specific tool implies its parent concept:
+    e.g., PostgreSQL → SQL, React → JavaScript, Git → Version Control, Docker → Containerization
 
-    2. LIBRARIES imply the CAPABILITIES they provide:
-       - A candidate who knows "pandas" and "numpy" obviously knows "data cleaning", "data wrangling", and "data manipulation".
-       - A candidate who knows "scikit-learn" obviously knows "machine learning fundamentals", "model evaluation", "data preprocessing".
-       - A candidate who knows "matplotlib" and "seaborn" obviously knows "data visualization".
-       - A candidate who knows "tensorflow" or "pytorch" obviously knows "deep learning".
+    2. A library implies the capability it provides:
+    e.g., Pandas → Data Manipulation, Scikit-learn → ML Fundamentals, Matplotlib → Data Visualization
 
-    3. BROAD SKILLS imply their FUNDAMENTALS:
-       - A candidate who lists "machine learning" obviously knows "machine learning fundamentals", "machine learning algorithms", "supervised learning", "unsupervised learning".
-       - A candidate who lists "data structures and algorithm" (any variant) knows "data structures", "algorithms", "data structures and algorithms".
-       - A candidate who lists "cloud computing" knows basic cloud concepts.
+    3. A broad skill implies its fundamentals:
+    e.g., Machine Learning → Supervised Learning, Cloud Computing → Cloud Concepts
 
-    4. VARIANT NAMES are the SAME skill:
-       - "scikit-learn" = "sklearn" = "scikit learn"
-       - "data structures and algorithm" = "data structures and algorithms" = "dsa"
-       - "javascript" = "js"
-       - "tensorflow" = "tf"
-       - "node.js" = "nodejs"
+    4. Variant names are identical:
+    e.g., "scikit-learn" = "sklearn", "javascript" = "js", "node.js" = "nodejs", "dsa" = "data structures and algorithms"
 
-    Apply this reasoning universally across ALL tech and non-tech domains.
-    If a candidate's listed skill reasonably demonstrates knowledge of a required skill, count it as matched.
+    Apply this reasoning universally across ALL domains.
+    If a candidate's listed skill reasonably demonstrates competence in a required skill, count it as matched.
     Only list a skill in skills_to_learn / missing_skills if it is genuinely NEW knowledge the candidate does not have.
 
     ========================================
-    MATCHED SKILLS FORMAT:
+    PART 1: Desired Role Analysis
     ========================================
 
-    For matched_skills, use the EXACT skill name as written in the candidate's skill list (preserve their casing/spelling).
-    For missing_skills / skills_to_learn, use standard industry lowercase names.
+    Analyze the candidate's desired role at their experience level ({experience_level}).
+    - Determine which of the candidate's skills are relevant to this role (matched_skills).
+    - Determine which important skills they still need to learn (missing_skills).
 
-    CRITICAL RULES:
+    ========================================
+    PART 2: Role Recommendations
+    ========================================
+
+    Below is a reference list of real job roles at the candidate's experience level ({experience_level}) along with their typical required skills:
+
+    {role_skill_map}
+
+    From this list, select the {top_n} roles where the candidate has the strongest skill alignment.
+    You MAY suggest a role not in this list only if the candidate's skill set strongly warrants it, but prefer roles from this list.
+
+    RANKING CRITERIA (in priority order):
+    1. Skill overlap — higher percentage of required skills already known by the candidate.
+    2. Career fit — the role is a natural match for the candidate's background and experience.
+    3. Learnability — the missing skills are reasonable extensions of what the candidate already knows.
+    4. Diversity — the {top_n} roles should represent distinct career directions, not minor variations of the same role.
+
+    For each recommended role, determine which candidate skills are relevant (matched_skills) and which new skills they need (skills_to_learn).
+
+    ========================================
+    FORMAT RULES:
+    ========================================
+
+    - For matched_skills, use the EXACT skill name as written in the candidate's skill list (preserve their casing/spelling).
+    - For missing_skills / skills_to_learn, use standard industry lowercase names.
+    - For each role, aim for 12 to 20 total skills (matched + missing combined) to reflect realistic job requirements.
+    - Do NOT include skill_match_percent — it will be calculated externally.
+    - experience_level must be one of: "Entry-Level", "Mid-Level", "Senior-Level".
     - Output ONLY raw JSON. No markdown, no code fences, no explanation.
     - The response MUST start with {{ and end with }}.
-    - All skill names in missing_skills and skills_to_learn must be lowercase.
-    - For each role, aim for 12 to 20 total skills (matched + missing combined) — this should reflect realistic job requirements.
-    - Do NOT include skill_match_percent ; that will be calculated externally.
-    - experience_level must be one of: "Entry-Level", "Mid-Level", "Senior-Level".
 
     ========================================
     OUTPUT FORMAT (STRICT JSON):
