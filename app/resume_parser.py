@@ -364,42 +364,6 @@ def estimate_experience_years(text: str) -> int:
 
 
 # ----------------------------
-# PARSE FOR ML/ANALYSIS
-# ----------------------------
-def parse_resume_for_analysis(resume_text: str) -> Dict:
-    """
-    Parse resume and return data structure optimized for ML analysis.
-    Returns counts and skills list for placement prediction and role matching.
-    """
-    clean = normalize_text(resume_text)
-
-    # Extract sections
-    skills_section = extract_section(clean, "Skills")
-    skills = extract_skills_from_section(skills_section)
-
-    cert_section = extract_section(clean, "Certifications")
-    certifications = extract_certifications_from_section(cert_section)
-
-    project_section = extract_section(clean, "Projects")
-    projects = extract_projects_from_section(project_section)
-
-    intern_section = extract_section(clean, "Internship") or extract_section(clean, "Experience")
-    internships = extract_internships_from_section(intern_section)
-
-    # Extract CGPA as float for ML
-    cgpa_str = extract_cgpa(clean)
-    cgpa = float(cgpa_str) if cgpa_str else 0.0
-
-    return {
-        "cgpa": cgpa,
-        "project_count": len(projects),
-        "internship_count": len(internships),
-        "certification_count": len(certifications),
-        "skills": skills  # Actual skills for matching algorithms
-    }
-
-
-# ----------------------------
 # PARSE FOR FRONTEND DISPLAY
 # ----------------------------
 def parse_resume_for_frontend(resume_text: str) -> Dict:
@@ -454,6 +418,6 @@ def parse_resume_for_frontend(resume_text: str) -> Dict:
 def build_editable_profile(resume_text: str) -> Dict:
     """
     Legacy function - now wraps parse_resume_for_frontend.
-    Use parse_resume_for_frontend() or parse_resume_for_analysis() instead.
+    Use parse_resume_for_frontend().
     """
     return parse_resume_for_frontend(resume_text)

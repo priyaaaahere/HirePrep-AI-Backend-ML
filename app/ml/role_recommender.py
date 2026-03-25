@@ -3,7 +3,7 @@ from typing import Dict, List, Set, Optional
 
 from app.experience import map_experience_level
 
-DATASET_PATH = "data/job_dataset_aggregated.csv"
+DATASET_PATH = "data/job_dataset_final.csv"
 
 # Flag to track if semantic matching is available
 _semantic_matching_available = None
@@ -34,7 +34,7 @@ def load_job_data() -> pd.DataFrame:
     """
     Load and preprocess job dataset
     """
-    df = pd.read_csv(DATASET_PATH)
+    df = pd.read_csv(DATASET_PATH, encoding="latin1")
     
     # Drop rows with missing Title
     df = df.dropna(subset=["Title"])
@@ -176,103 +176,3 @@ def recommend_roles(
     
     return recommendations[:top_n]
 
-
-def get_role_recommendations_from_profile(profile: dict, top_n: int = 10) -> Dict:
-    """
-    Get role recommendations from a complete user profile.
-    
-    If user specifies a desired_role that's not in dataset, uses semantic
-    matching to find similar roles and prioritizes them in recommendations.
-    
-    Args:
-        profile: User profile dictionary (from resume parser)
-        top_n: Number of recommendations to return
-    
-    Returns:
-        Dictionary with recommendations and metadata
-    """
-    # Extract relevant data from profile
-    skills = profile.get("skills", [])
-    
-    education = profile.get("education", {})
-    degree = education.get("degree", "")
-    
-    experience = profile.get("experience", {})
-    experience_years = experience.get("years", 0)
-    
-    # Check if user has a desired role specified
-    career_prefs = profile.get("career_preferences", {})
-    desired_role = career_prefs.get("desired_role", "")
-    
-    # Get recommendations
-    recommendations = recommend_roles(
-        resume_skills=skills,
-        experience_years=experience_years,
-        education_degree=degree,
-        top_n=top_n
-    )
-    
-    # If user has a desired role, use semantic matching to find related roles
-    role_match_info = None
-    if desired_role and is_semantic_matching_available():
-        try:
-            from app.ml.role_matcher import smart_role_match
-            
-            role_match_result = smart_role_match(desired_role, "")
-            matched_role = role_match_result.get("matched_role", "")
-            similarity = role_match_result.get("similarity", 0)
-            
-            if similarity >= 0.3 and matched_role:
-                role_match_info = {
-                    "requested_role": desired_role,
-                    "matched_to_role": matched_role,
-                    "similarity": similarity,
-                    "match_type": role_match_result.get("match_type"),
-                    "alternatives": role_match_result.get("alternatives", [])
-                }
-                
-                # Boost matching roles in recommendations
-                for rec in recommendations:
-                    if rec["role"].lower() == matched_role.lower():
-                        rec["is_desired_role_match"] = True
-                        rec["match_score"] = min(100, rec["match_score"] + 10)  # Boost score
-                    # Also check alternatives
-                    alt_roles = [a.get("role", "").lower() if isinstance(a, dict) else "" 
-                                 for a in role_match_result.get("alternatives", [])]
-                    if rec["role"].lower() in alt_roles:
-                        rec["is_related_to_desired"] = True
-                        rec["match_score"] = min(100, rec["match_score"] + 5)  # Smaller boost
-                
-                # Re-sort after boosting
-                recommendations.sort(key=lambda x: x["match_score"], reverse=True)
-                
-        except Exception:
-            pass  # Continue without semantic matching if it fails
-    
-    # Categorize recommendations
-    high_match = [r for r in recommendations if r["match_score"] >= 60]
-    moderate_match = [r for r in recommendations if 40 <= r["match_score"] < 60]
-    stretch_roles = [r for r in recommendations if r["match_score"] < 40]
-    
-    result = {
-        "total_roles_analyzed": len(load_job_data()["Title"].unique()),
-        "recommendations": recommendations,
-        "summary": {
-            "high_match_count": len(high_match),
-            "moderate_match_count": len(moderate_match),
-            "stretch_roles_count": len(stretch_roles),
-            "top_role": recommendations[0]["role"] if recommendations else None,
-            "top_score": recommendations[0]["match_score"] if recommendations else 0
-        },  
-        "user_profile_summary": {
-            "skills_count": len(skills),
-            "experience_level": map_experience_level(experience_years),
-            "experience_years": experience_years
-        }
-    }
-    
-    # Include role matching info if semantic matching was used
-    if role_match_info:
-        result["desired_role_matching"] = role_match_info
-    
-    return result

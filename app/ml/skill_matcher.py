@@ -2,7 +2,7 @@ import pandas as pd
 from typing import Dict, List, Set, Optional
 
 # Use aggregated dataset which has ALL skills combined per role+level
-DATASET_PATH = "data/job_dataset_aggregated.csv"
+DATASET_PATH = "data/job_dataset_final.csv"
 
 # Flag to track if semantic matching is available
 _semantic_matching_available = None
@@ -101,7 +101,7 @@ def load_role_skills(role: str, level: str) -> tuple[Set[str], Optional[Dict]]:
         - skills_set: Set of required skills
         - role_match_info: Dict with matching details (if semantic match was used)
     """
-    df = pd.read_csv(DATASET_PATH)
+    df = pd.read_csv(DATASET_PATH, encoding="latin1")
     
     role_match_info = None
     
