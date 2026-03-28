@@ -196,8 +196,8 @@ STEP 1: Remove the desired_role completely from the dataset role list.
 
 STEP 2: From the remaining roles, select the BEST {top_n} roles.
 
-IMPORTANT:
-- The desired_role must NOT be considered during ranking.
+VERY IMPORTANT:
+- The Desired Role SHOULD NOT be considered during ranking SHOULD NOT be seen in five role recommendations of output.
 - It must NOT appear in the final roles array.
 For each role, list ONLY the candidate skills that are TRULY RELEVANT to that role.
 
