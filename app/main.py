@@ -5,6 +5,7 @@ from app.pdf_to_text import extract_text_from_pdf
 from app.resume_parser import parse_resume_for_frontend
 from app.experience import map_experience_level
 from app.ml.placement_predictor import predict_base_probability
+from app.ml.role_recommender import recommend_roles
 from app.ml.skill_matcher import compute_skill_match
 from app.Services.gemini_role_recommender import get_gemini_role_recommendations
 
@@ -102,7 +103,22 @@ async def complete_analysis(profile: dict):
         matched_skills = dataset_skill.get("matched_skills", [])
         missing_skills = dataset_skill.get("missing_skills", [])
 
-        role_result = get_role_recommendations_from_profile(profile, top_n=5)
+        all_roles = recommend_roles(
+            resume_skills=skills,
+            experience_years=experience_years,
+            top_n=20
+        )
+
+        # Exclude desired role
+        filtered_roles = [
+            role for role in all_roles
+            if role["role"].lower().strip() != desired_role.lower().strip()
+        ]
+
+        role_result = {
+            "recommendations": filtered_roles[:5]
+        }
+        
         top_roles = [
             {
                 "rank": idx + 1,

@@ -27,7 +27,7 @@ import pickle
 _model = None
 _embeddings_cache = None
 
-DATASET_PATH = "data/job_dataset_aggregated.csv"
+DATASET_PATH = "data/job_dataset_final.csv"
 EMBEDDINGS_CACHE_PATH = "app/ml/models/role_embeddings.pkl"
 
 # Similarity threshold - below this, consider it a poor match

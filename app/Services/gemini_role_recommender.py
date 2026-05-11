@@ -12,7 +12,7 @@ from app.ml.skill_matcher import compute_skill_match
 
 load_dotenv()
 
-DEFAULT_GEMINI_MODEL = "gemma-3-4b-it"
+DEFAULT_GEMINI_MODEL = "gemma-4-31b-it"
 
 
 def _extract_json(text: str) -> Optional[Dict]:
@@ -288,7 +288,10 @@ def get_gemini_role_recommendations(profile: dict, top_n: int = 5) -> Optional[D
     try:
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(model=model, contents=prompt)
-    except Exception:
+    except Exception as e:
+        print("\n===== GEMINI ERROR =====")
+        print(e)
+        print("========================\n")
         return None
 
     data = _extract_json(getattr(response, "text", ""))

@@ -12,7 +12,7 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 # 3. Generate Content
 try:
     response = client.models.generate_content(
-        model="gemma-3-4b-it", 
+        model="gemma-4-31b-it", 
         contents="Explain how the new Google GenAI SDK is different in one sentence."
     )
     print(response.text)

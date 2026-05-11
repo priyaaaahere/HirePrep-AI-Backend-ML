@@ -44,7 +44,7 @@ def find_matching_role(role: str, level: str, df: pd.DataFrame) -> Optional[pd.D
     # Strategy 1: Exact match on title
     exact_match = df[
         (df["Title"].str.lower() == role_lower) &
-        (df["ExperienceLevel"].str.lower().str.contains(level_lower, na=False))
+        (df["ExperienceLevel_Category"].str.lower().str.contains(level_lower, na=False))
     ]
     if not exact_match.empty:
         return exact_match
@@ -52,7 +52,7 @@ def find_matching_role(role: str, level: str, df: pd.DataFrame) -> Optional[pd.D
     # Strategy 2: Partial/substring match (original behavior)
     partial_match = df[
         (df["Title"].str.lower().str.contains(role_lower, na=False)) &
-        (df["ExperienceLevel"].str.lower().str.contains(level_lower, na=False))
+        (df["ExperienceLevel_Category"].str.lower().str.contains(level_lower, na=False))
     ]
     if not partial_match.empty:
         return partial_match
